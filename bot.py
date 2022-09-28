@@ -59,7 +59,7 @@ except requests.exceptions.HTTPError:
     pass
 
 
-#bitcoin holiday? TODO
+#bitcoin holiday?
 endpoint = '/api/holidays/today/'
 url = base_url + endpoint
 isHoliday = False
