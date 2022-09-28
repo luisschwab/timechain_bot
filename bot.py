@@ -59,8 +59,8 @@ except requests.exceptions.HTTPError:
     pass
 
 
-#bitcoin holiday?
-endpoint = '/api/holidays/08-23/'
+#bitcoin holidays
+endpoint = '/api/holidays/today/'
 url = base_url + endpoint
 isHoliday = False
 try:
