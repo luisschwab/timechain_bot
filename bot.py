@@ -60,7 +60,7 @@ except requests.exceptions.HTTPError:
 
 
 #bitcoin holiday?
-endpoint = '/api/holidays/today/'
+endpoint = '/api/holidays/08-23/'
 url = base_url + endpoint
 isHoliday = False
 try:
@@ -82,8 +82,14 @@ tweet = (f'height: {height}\n'
 
 if isHoliday:
     tweet += '\n\n' + 'Today is ' + holiday_name + '!'
-    if len(tweet + holiday_desc)<CHAR_LIMIT:
-        tweet += '\n' + holiday_desc
+
+    htmlLinkTag = '<a href='
+
+    if htmlLinkTag in holiday_desc:
+        pass
+    else:
+        if len(tweet + holiday_desc)<CHAR_LIMIT:
+            tweet += '\n' + holiday_desc
 
 print(tweet)
 
