@@ -60,7 +60,7 @@ except requests.exceptions.HTTPError:
 
 
 #bitcoin holidays
-endpoint = '/api/holidays/today/'
+endpoint = '/api/holidays/today?tzOffset=-3/'
 url = base_url + endpoint
 isHoliday = False
 try:
