@@ -1,4 +1,5 @@
 import os
+from re import S
 import dotenv
 import tweepy
 import requests
@@ -18,18 +19,18 @@ height, epoch, hashrate, supply = 'null', 'null', 'null', 'null'
 
 
 # Pulling info from an API for now
-base_url = 'https://bitcoinexplorer.org'
+base_url = 'https://mempool.space'
 
 
 #block height
-endpoint = '/api/blocks/tip/height/'
+endpoint = '/api/blocks/tip/height'
 url = base_url + endpoint
 try:
     response = requests.get(url, timeout=5); response.raise_for_status()
     height = response.json()
 except requests.exceptions.HTTPError:
     pass
-
+    
 
 #epoch progress
 epoch = height//210000
@@ -37,31 +38,28 @@ epoch_progress = (height%210000)/210000
 
 
 #hashrate
-endpoint = '/api/mining/hashrate/'
+endpoint = '/api/v1/mining/hashrate/3d'
 url = base_url + endpoint
 try:
     response = requests.get(url, timeout=5); response.raise_for_status()
     data = response.json()
-    hashrate = round(data['1Day']['val'], 2)
+    hashrate = data['hashrates'][0]['avgHashrate']/10**18
     hashrate_unit = 'EH/s'
 except requests.exceptions.HTTPError:
     pass
 
 
 #supply
-endpoint = '/api/blockchain/coins/'
-url = base_url + endpoint
-try:
-    response = requests.get(url, timeout=5); response.raise_for_status()
-    supply = int(response.json())
-
-except requests.exceptions.HTTPError:
-    pass
+supply = 0
+for i in range (epoch):
+    supply += 210000*(50/(2**i))
+supply += 210000*(50/(2**epoch)) * epoch_progress
+supply = int(supply)
 
 
 #bitcoin holidays
-endpoint = '/api/holidays/today?tzOffset=-3/'
-url = base_url + endpoint
+url = 'https://bitcoinexplorer.org/api/holidays/today?tzOffset=-3/'
+
 isHoliday = False
 try:
     response = requests.get(url, timeout=5); response.raise_for_status()
@@ -76,8 +74,8 @@ except requests.exceptions.HTTPError:
 
 
 tweet = (f'height: {height}\n'
-         f'hashrate: {hashrate} EH/s\n'
-         f'supply: {supply:,}₿ [{supply/21000000:.2%}]\n'
+         f'hashrate: {hashrate:.2f} EH/s\n'
+         f'supply: {supply:,} ₿ [{supply/21000000:.2%}]\n'
          f'epoch: {epoch} [{epoch_progress:.2%}]')
 
 if isHoliday:
@@ -94,4 +92,3 @@ if isHoliday:
 print(tweet)
 
 push = client.create_tweet(text=tweet)
-
