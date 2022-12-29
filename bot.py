@@ -29,7 +29,7 @@ try:
     height = response.json()
 except requests.exceptions.HTTPError:
     pass
-    
+
 
 #epoch progress
 epoch = height//210000
@@ -68,11 +68,11 @@ try:
         isHoliday = True
         holiday_name = data['holidays'][0]['name']
         holiday_desc = data['holidays'][0]['desc']
-except requests.exceptions.HTTPError:
+except:
     pass
 
 
-tweet = (f'height: {height}\n'
+tweet = (f'height: {height:,}\n'
          f'hashrate: {hashrate:.2f} EH/s\n'
          f'supply: {supply:,} ₿ [{supply/21000000:.2%}]\n'
          f'epoch: {epoch} [{epoch_progress:.2%}]')
