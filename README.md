@@ -5,5 +5,5 @@ then posts on X and nostr.
 
 Follow it:
 - https://x.com/timechain_bot
-- https://primal.net/p/npub1gpuch9x37vkcmhsaaxxyk3760p9navytsxpp32vwlftvl00rqyaqefys3s
+- https://njump.me/npub1gpuch9x37vkcmhsaaxxyk3760p9navytsxpp32vwlftvl00rqyaqefys3s
 
