@@ -4,7 +4,7 @@
 //! timechain_bot@luisschwab.net
 
 use dotenv::dotenv;
-use nostr_sdk::prelude::*;
+use nostr_sdk::{Client, EventBuilder, Keys};
 use serde_json::Value;
 use std::env;
 use thousands::Separable;
@@ -81,10 +81,9 @@ async fn main() -> Result<(), reqwest::Error> {
         supply += 210_000.0 * (50.0 / (2_f32.powf(i as f32)));
     }
     supply += 210_000.0 * (50.0 / 2_f32.powf(epoch as f32)) * epoch_progress;
-    //println!("{}", supply);
-    
+
     // build post
-    let mut post = format!( 
+    let post = format!(
         "height: {}\n\
         hashrate: {:.2} EH/s\n\
         supply: ₿{} [{:.2}%]\n\
@@ -98,11 +97,10 @@ async fn main() -> Result<(), reqwest::Error> {
     );
     println!("{}", post);
 
-    // holidays 
+    // holidays
     // let holiday_api: &str = "https://bitcoinexplorer.org/api/holidays/01-03/";
     // TODO: figure out how to bypass CF's 403
-    // works with curl but no with reqwest
-    
+    // works with curl but not with reqwest
     let payload = post; // + holiday
 
     // poast on x.com
@@ -123,10 +121,10 @@ async fn main() -> Result<(), reqwest::Error> {
             }
         }
     }
-    
+
     // poast on nostr
     if POAST_NOSTR {
-        let privkey = match Keys::parse(&kv["NOSTR_SEC"]) {
+        let key = match Keys::parse(&kv["NOSTR_SEC"]) {
             Ok(key) => key,
             Err(e) => {
                 println!("error while parsing nostr private key: {:#?}", e);
@@ -134,14 +132,17 @@ async fn main() -> Result<(), reqwest::Error> {
             }
         };
 
-        let nostr_client = Client::new(privkey);
-
+        let nostr_client = Client::new(key.clone());
         for relay in NOSTR_RELAYS {
             nostr_client.add_relay(*relay).await.unwrap();
             nostr_client.connect().await;
         }
 
-        match nostr_client.publish_text_note(payload, []).await {
+        let event = EventBuilder::text_note(payload)
+            .sign_with_keys(&key)
+            .expect("failed to create event");
+
+        match nostr_client.send_event(event).await {
             Ok(output) => {
                 println!("successfully poasted to nostr: https://njump.me/{}", output.id().to_hex());
             }
